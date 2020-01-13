@@ -4,6 +4,13 @@ import router from './router'
 import store from './store'
 import './plugins/element.js'
 
+import 'assets/font/iconfont.css'
+import 'assets/css/global.css'
+
+import axios from 'axios'
+axios.defaults.baseURL = 'https://www.liulongbin.top:8888/api/private/v1/'
+Vue.prototype.$http = axios
+
 Vue.config.productionTip = false
 
 new Vue({
