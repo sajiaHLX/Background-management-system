@@ -59,7 +59,7 @@
               :enterable="false"
               placement="top"
             >
-              <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="mini" @click="setRole(scope.row)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -120,6 +120,26 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="editDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="editUserInfo">确 定</el-button>
+      </span>
+    </el-dialog>
+    <!-- 分配角色的对话框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="50%">
+      <span>
+        <p>当前的用户：{{userInfo.username}}</p>
+        <p>当前用户的角色：{{userInfo.role_name}}</p>
+        <p>分配新角色：
+          <el-select v-model="selectRoleId" placeholder="请选择">
+            <el-option v-for="item in rolesList" :key="item.id" :label="item.roleName" :value="item.id">
+            </el-option>
+          </el-select>
+        </p>
+      </span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -220,7 +240,15 @@ export default {
       // 控制修改对话框的展示隐藏
       editDialogVisible: false,
       // 查询到的要修改的用户信息
-      editForm: {}
+      editForm: {},
+      // 控制分配角色对话框的显示隐藏
+      setRoleDialogVisible: false,
+      // 需要被分配的用户信息
+      userInfo: {},
+      // 所有角色的数据列表
+      rolesList: [],
+      // 当前选中角色的id
+      selectRoleId: ''
     }
   },
   methods: {
@@ -230,6 +258,7 @@ export default {
       })
       if (res.meta.status !== 200) return this.$message.error('获取用户列表失败！')
       this.userlist = res.data.users
+      console.log(this.userlist)
       this.total = res.data.total
     },
     // 监听pagesize改变的事件
@@ -338,6 +367,39 @@ export default {
       //     message: '已取消删除'
       //   })
       // })
+    },
+    // 获取角色列表
+    setRole(userInfo) {
+      this.selectRoleId = ''
+      this.userInfo = userInfo
+      // 在展示对话框之前获取所有的角色列表
+      this.$http.get('roles').then(res => {
+        const data = res.data
+        if (data.meta.status !== 200) {
+          return this.$message.error('获取角色列表失败！')
+        }
+        this.rolesList = data.data
+      })
+      this.setRoleDialogVisible = true
+    },
+    // 存储选择的角色
+    saveRoleInfo() {
+      if (!this.selectRoleId) {
+        return this.$message.error('请选择要分配的角色')
+      }
+      this.$http.put(`users/${this.userInfo.id}/role`, {
+        rid: this.selectRoleId
+      }).then(res => {
+        const data = res.data
+        console.log(res)
+        if (data.meta.status !== 200) {
+          this.setRoleDialogVisible = false
+          return this.$message.error(data.meta.msg)
+        }
+        this.$message.success('更新成功！')
+        this.getUserList()
+        this.setRoleDialogVisible = false
+      })
     }
   },
   created() {

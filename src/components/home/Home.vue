@@ -9,7 +9,7 @@
       <el-button type="info" @click="logout">退出</el-button>
     </el-header>
     <!-- 页面内容 -->
-    <el-container>
+    <el-container class="home-main-container">
       <!-- 侧边栏 -->
       <el-aside :width="isCollapse ? '64px' : '200px'">
         <div class="toggle-button" @click="toggleCollapse">|||</div>
@@ -118,6 +118,7 @@ export default {
 }
 .el-aside {
   background-color: #333744;
+  height: 100%;
   .el-menu{
     border-right: none;
   }
@@ -138,4 +139,10 @@ export default {
   cursor: pointer;
   user-select: none;
 }
+.home-main-container{
+  overflow: hidden;
+}
+// .el-main{
+//   overflow: hidden;
+// }
 </style>
